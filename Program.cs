@@ -2,6 +2,8 @@
 int eggSupply = 0; //Запас яиц
 int day = 0;
 
+string savePath = "save.game";
+
 ChickenState[] chickenStatus = new ChickenState[chickenCount];
 int[] chickenEggCount = new int[chickenCount];
 
@@ -9,12 +11,13 @@ for (int i = 0; i < chickenCount; i++)
     chickenStatus[i] = ChickenState.Alive;
 
 NewDay();
+LoadGame();
 
 while (true)
 {
-    Console.Clear();
     var res = ShowMenu();
     if (res == -1) break;
+    Console.Clear();
 }
 
 int ShowMenu()
@@ -24,7 +27,7 @@ int ShowMenu()
 
         ShowSatus();
 
-        Console.WriteLine("Выберите одно из действий:\n1. Покормить куриц\n2. Собрать яйца\n3. Завершить ход (ничего не делать)\n4. Выйти\n");
+        Console.WriteLine("Выберите одно из действий:\n1. Покормить куриц\n2. Собрать яйца\n3. Завершить ход (ничего не делать)\n4. Выйти\n5. Сохранить игру");
         var res = int.TryParse(Console.ReadLine(), out int number);
         if (res)
         {
@@ -36,6 +39,7 @@ int ShowMenu()
                 return 3;
             }
             else if (number == 4) return -1;
+            else if (number == 5) SaveGame();
         }
         Console.Clear();
     }
@@ -93,6 +97,56 @@ void GetChickenStatus(out int alive, out int dead, out int eggCollect)
         if (chickenStatus[i] == ChickenState.Dead) dead++;
         else alive++;
         eggCollect += chickenEggCount[i];
+    }
+}
+
+void SaveGame()
+{
+    using BinaryWriter bw = new BinaryWriter(File.Open(savePath, FileMode.OpenOrCreate));
+    try
+    {
+        bw.Write(day);
+        bw.Write(chickenCount);
+        bw.Write(eggSupply);
+        for (int i = 0; i < chickenCount; i++)
+        {
+            bw.Write(chickenStatus[i].ToString());
+        }
+        for (int i = 0; i < chickenCount; i++)
+        {
+            bw.Write(chickenEggCount[i]);
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Не удалось сохранить игру");
+    }
+}
+
+void LoadGame()
+{
+    if (File.Exists(savePath))
+    {
+        using BinaryReader br = new BinaryReader(File.Open(savePath, FileMode.Open));
+        try
+        {
+            day = br.ReadInt32();
+            chickenCount = br.ReadInt32();
+            eggSupply = br.ReadInt32();
+            for (int i = 0; i < chickenCount; i++)
+            {
+                chickenStatus[i] = (ChickenState)Enum.Parse(typeof(ChickenState), br.ReadString());
+            }
+            for (int i = 0; i < chickenCount; i++)
+            {
+                chickenEggCount[i] = br.ReadInt32();
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Не удалось загрузить файл сохранения");
+        }
+
     }
 }
 
