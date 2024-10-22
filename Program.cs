@@ -124,6 +124,8 @@ bool LoadGame()
             day = br.ReadInt32();
             chickenCount = br.ReadInt32();
             eggSupply = br.ReadInt32();
+            chickenStatus = new ChickenState[chickenCount];
+            chickenEggCount = new int[chickenCount];
             for (int i = 0; i < chickenCount; i++)
             {
                 chickenStatus[i] = (ChickenState)Enum.Parse(typeof(ChickenState), br.ReadString());
