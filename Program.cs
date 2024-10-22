@@ -10,14 +10,14 @@ int[] chickenEggCount = new int[chickenCount];
 for (int i = 0; i < chickenCount; i++)
     chickenStatus[i] = ChickenState.Alive;
 
-NewDay();
-LoadGame();
+
+if (!LoadGame()) NewDay();
 
 while (true)
 {
+    Console.Clear();
     var res = ShowMenu();
     if (res == -1) break;
-    Console.Clear();
 }
 
 int ShowMenu()
@@ -31,32 +31,23 @@ int ShowMenu()
         var res = int.TryParse(Console.ReadLine(), out int number);
         if (res)
         {
-            if (number == 1) FeedChickens();
-            else if (number == 2) CollectEggs();
-            else if (number == 3)
-            {
-                NewDay();
-                return 3;
-            }
+            if (number == 1) { FeedChickens(); return 1; }
+            else if (number == 2) { CollectEggs(); return 2; }
+            else if (number == 3) { NewDay(); return 3; }
             else if (number == 4) return -1;
-            else if (number == 5) SaveGame();
+            else if (number == 5) { SaveGame(); return 5; }
         }
-        Console.Clear();
+        
     }
 }
 
 void CollectEggs()
 {
-    int collect = 0;
     for (int i = 0; i < chickenCount; i++)
     {
-
-        collect += chickenEggCount[i];
         eggSupply += chickenEggCount[i];
         chickenEggCount[i] = 0;
-
     }
-    Console.WriteLine($"Собрано яиц: {collect}. Всего яиц: {eggSupply}");
 }
 
 void FeedChickens()
@@ -123,7 +114,7 @@ void SaveGame()
     }
 }
 
-void LoadGame()
+bool LoadGame()
 {
     if (File.Exists(savePath))
     {
@@ -141,12 +132,17 @@ void LoadGame()
             {
                 chickenEggCount[i] = br.ReadInt32();
             }
+            return true;
         }
         catch (Exception e)
         {
             Console.WriteLine("Не удалось загрузить файл сохранения");
+            return false;
         }
 
+    } else
+    {
+        return false;
     }
 }
 
